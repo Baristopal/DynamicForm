@@ -7,7 +7,10 @@ public class AutoMapperProfile : Profile
 {
     public AutoMapperProfile()
     {
-        CreateMap<User, UserDto>();
+        CreateMap<User, UserDto>().ReverseMap();
+        CreateMap<Form, FormDto>().ReverseMap();
+        CreateMap<Field, FieldDto>().ReverseMap();
+
     }
 
 }

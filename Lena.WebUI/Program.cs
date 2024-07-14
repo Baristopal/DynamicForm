@@ -15,6 +15,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.ConfigureService(builder.Configuration);
 
 builder.Services.AddScoped<IValidator<UserForRegisterDto>, UserRegisterValidator>();
+builder.Services.AddScoped<IValidator<FormDto>, EditFormValidator>();
+
 builder.Services.AddValidatorsFromAssemblyContaining<UserRegisterValidator>();
 
 builder.Services.AddHttpContextAccessor();

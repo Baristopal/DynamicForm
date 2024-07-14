@@ -45,7 +45,7 @@ public class AuthController : Controller
 
         var claims = new List<Claim>
         {
-            new Claim("UserName", result.Data.UserName),
+            new Claim(ClaimTypes.NameIdentifier, result.Data.Id.ToString()),
             new Claim(ClaimTypes.Email, result.Data.Email),
             new Claim(ClaimTypes.Name, $"{result.Data.FirstName} {result.Data.LastName}"),
             new Claim(ClaimTypes.Role, "User"),
@@ -82,7 +82,7 @@ public class AuthController : Controller
 
         var claims = new List<Claim>
         {
-            new Claim("UserName", result.Data.UserName),
+           new Claim(ClaimTypes.NameIdentifier, result.Data.Id.ToString()),
             new Claim(ClaimTypes.Email, result.Data.Email),
             new Claim(ClaimTypes.Name, $"{result.Data.FirstName} {result.Data.LastName}"),
             new Claim(ClaimTypes.Role, "User"),

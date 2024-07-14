@@ -31,7 +31,7 @@ public static class RegisterService
         services.AddScoped<IFormDal, FormDal>();
 
 
-
+        services.AddScoped<IFormService, FormManager>();
         services.AddScoped<IUserService, UserManager>();
     }
 
