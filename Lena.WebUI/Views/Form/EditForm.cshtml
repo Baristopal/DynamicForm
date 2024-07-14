@@ -1,0 +1,138 @@
+﻿@using Business.Enums
+@* <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+</body>
+</html>
+ *@
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('input[type="checkbox"]').prop('disabled', true);
+
+        var selectedFields = [];
+        $('.custom-button').click(function () {
+            var fieldName = $(this).attr('name');
+
+            if (selectedFields.find(e => e.name === fieldName)) {
+                selectedFields = $.grep(selectedFields, function (e) {
+                    return e.name !== fieldName;
+                });
+                // selectedFields = selectedFields.filter(e => e !== fieldName);
+                console.log(selectedFields);
+                $(this).removeClass('btn-info');
+                $(this).addClass('btn-light');
+
+                $("#field-" + fieldName + "-Required").prop('disabled', true);
+                $("#field-" + fieldName + "-Required").prop('checked', false);
+                return;
+            }
+            var model = {
+                name: fieldName,
+                required: $(this).find('input[type="checkbox"]').is(':checked')
+            }
+            selectedFields.push(model);
+            $(this).addClass('btn-info');
+            $(this).removeClass('btn-light');
+
+            $("#field-" + fieldName + "-Required").prop('disabled', false);
+
+            console.log(selectedFields);
+
+        });
+
+        $('input[type="checkbox"]').click(function () {
+            var fieldName = $(this).attr('name').split('-')[1];
+            if (selectedFields.find(e => e.name === fieldName)) {
+
+                var model = {
+                    name: fieldName,
+                    required: $(this).is(':checked')
+                }
+                selectedFields = selectedFields.filter(e => e.name !== fieldName);
+                selectedFields.push(model);
+                console.log(selectedFields);
+            }
+            
+        });
+
+        $(".close").click(function () {
+            $("#exampleModalCenter").modal("hide");
+        });
+    });
+</script>
+
+<style>
+    .customBorder {
+        border: 1px;
+        solid white;
+    }
+
+    .selected {
+        background: #0f5132;
+    }
+</style>
+
+
+<div class="modal fade bd-example-modal-lg" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Form Oluştur</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-6">
+                        <form id="editData">
+                            <div class="row gy-3 gy-md-4 overflow-hidden">
+                                <div class="col-12">
+                                    <label for="Name" class="form-label">Form Name</label>
+                                    <input type="text" class="form-control" name="Name" id="Name">
+                                </div>
+                                <div class="col-12">
+                                    <label for="Description" class="form-label">Description</label>
+                                    <textarea class="form-control" name="Description" id="Description" rows="6" ></textarea>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-6">
+                        <div>
+                            <h5>Form Öğeleri</h5>
+                            <p style="font-size:small">Buton içindeki Checkbox'lar <span style="color:red">Required</span> kontrolü sağlıyor</p>
+                        </div>
+                        <div class="d-flex row">
+                            @foreach (var field in Enum.GetNames(typeof(FieldEnums)))
+                            {
+                                <div class="col-6" style="margin-top:5px;">
+                                    <button type="button" id="@("field-" + field)" name="@field" class="btn btn-light btn-block custom-button" style="width:100%;">
+                                        <div class="d-flex justify-content-between">
+                                            @field
+                                            <div>
+                                                @* <label for="@("field-" + field + "-Required")"><span style="color:red">*</span></label> *@
+                                                <input class="form-check-input" type="checkbox" onclick="event.stopPropagation();" value="" name="@("field-" + field + "-Required")" id="@("field-" + field + "-Required")" />
+                                            </div>
+                                        </div>
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary close" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,65 @@
+﻿@{
+    Layout = "_Layout";
+}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#getModal').on('click', function () {
+
+            $.ajax({
+                url: '/EditForm',
+                type: 'GET',
+                success: function (result) {
+                    $('#modalContainer').html(result);
+                    $('#exampleModalCenter').modal('show');
+                }
+
+            });
+        });
+
+      
+    });
+</script>
+
+
+
+<div class="d-flex flex-row-reverse">
+    <button type="button" id="getModal" class="btn btn-primary" style="border-radius:5px;">Yeni Form Oluştur</button>
+</div>
+
+
+<div id="modalContainer"></div>
+
+<div class="mt-5">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">First</th>
+                <th scope="col">Last</th>
+                <th scope="col">Handle</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th scope="row">1</th>
+                <td>Mark</td>
+                <td>Otto</td>
+                <td>asd</td>
+            </tr>
+            <tr>
+                <th scope="row">2</th>
+                <td>Jacob</td>
+                <td>Thornton</td>
+                <td>asdasd</td>
+            </tr>
+            <tr>
+                <th scope="row">3</th>
+                <td colspan="2">Larry the Bird</td>
+                <td>asdasf</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
