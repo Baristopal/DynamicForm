@@ -1,5 +1,6 @@
 ﻿using Business.Abstract;
 using Entities.Dto;
+using Entities.Models;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Authentication;
@@ -14,11 +15,13 @@ public class AuthController : Controller
 {
     private readonly IUserService _userService;
     private readonly IValidator<UserForRegisterDto> _validator;
+    private readonly IValidator<UserForLoginDto> _loginValidator;
 
-    public AuthController(IUserService userService, IValidator<UserForRegisterDto> validator)
+    public AuthController(IUserService userService, IValidator<UserForRegisterDto> validator, IValidator<UserForLoginDto> loginValidator)
     {
         _userService = userService;
         _validator = validator;
+        _loginValidator = loginValidator;
     }
 
     [HttpGet("register")]
@@ -28,7 +31,7 @@ public class AuthController : Controller
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register(UserForRegisterDto model)
+    public async Task<IActionResult> Register([FromBody]UserForRegisterDto model)
     {
         ValidationResult validationResult = _validator.Validate(model);
 
@@ -42,7 +45,7 @@ public class AuthController : Controller
         }
         var result = await _userService.Register(model);
         if (!result.Success)
-            return BadRequest(result.Message);
+            return Json(new { success = false, message = result.Message });
 
         var claims = new List<Claim>
         {
@@ -64,22 +67,33 @@ public class AuthController : Controller
 
 
 
-        return RedirectToAction("/");
+        return Json(new { success = true, redirectUrl = Url.Action("Index", "Home") });
     }
 
 
     [HttpGet("login")]
     public IActionResult Login()
-    {
+    {   
         return View();
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login(UserForLoginDto model)
+    public async Task<IActionResult> Login([FromBody]UserForLoginDto model)
     {
+        ValidationResult validationResult = _loginValidator.Validate(model);
+
+        if (!validationResult.IsValid)
+        {
+            foreach (var error in validationResult.Errors)
+            {
+                ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+            }
+            return View(new ResponseModel<UserForLoginDto>(false, ""));
+        }
+
         var result = await _userService.Login(model);
         if (!result.Success)
-            return BadRequest(result.Message);
+            return Json(new { success = false, message = result.Message });
 
         var claims = new List<Claim>
         {
@@ -99,7 +113,7 @@ public class AuthController : Controller
 
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, props);
 
-        return RedirectToAction("Index", "Home");
+        return Json(new { success = true, redirectUrl = Url.Action("Index", "Home") });
 
     }
 }

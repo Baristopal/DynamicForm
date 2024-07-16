@@ -11,31 +11,7 @@
 
 }
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<script type="text/javascript">
 
-    $(document).ready(function () {
-        $('#formAuthentication').on('submit', function (event) {
-            var form = this;
-            debugger;
-
-            $.ajax({
-                type: 'POST',
-                url: '/auth/register',
-                data: $(form).serialize(),
-                success: function (response) {
-                    if (response.status === 200) {
-                        alert('User registered successfully!');
-                        window.location.href = '/';
-                    } else {
-                        alert(response.message);
-                    }
-                },
-            });
-        });
-    });
-
-</script>
 
 
 <div class="mx-auto mt-5 bsb-tpl-bg-lotion">
@@ -50,33 +26,34 @@
         </div>
         <form id="formAuthentication" class="mb-3" method="post">
             <div class="row gy-3 gy-md-4 overflow-hidden">
+                <div id="errorMessage" class="alert alert-danger" style="display:none;"></div>
                 <div class="col-12">
                     <label for="firstName" class="form-label">First Name <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" name="firstName" id="firstName" placeholder="First Name">
-                    <span style="color:red;" asp-validation-for="FirstName"></span>
+                    <span style="color:red;" asp-validation-for="FirstName" id="firstNameValidator"></span>
                 </div>
                 <div class="col-12">
                     <label for="lastName" class="form-label">Last Name <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" name="lastName" id="lastName" placeholder="Last Name">
-                    <span style="color:red;" asp-validation-for="LastName"></span>
+                    <span style="color:red;" asp-validation-for="LastName" id="lastNameValidator"></span>
 
                 </div>
                 <div class="col-12">
                     <label for="userName" class="form-label">User Name <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" name="userName" id="userName" placeholder="User Name">
-                    <span style="color:red;" asp-validation-for="UserName"></span>
+                    <span style="color:red;" asp-validation-for="UserName" id="userNameValidator"></span>
 
                 </div>
                 <div class="col-12">
                     <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
                     <input type="email" class="form-control" name="email" id="email" placeholder="name@example.com">
-                    <span style="color:red;" asp-validation-for="Email"></span>
+                    <span style="color:red;" asp-validation-for="Email" id="emailValidator"></span>
 
                 </div>
                 <div class="col-12">
                     <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
                     <input type="password" class="form-control" name="password" id="password" value="">
-                    <span style="color:red;" asp-validation-for="Password"></span>
+                    <span style="color:red;" asp-validation-for="Password" id="passwordValidator"></span>
 
                 </div>
                 <div class="col-12">
@@ -89,8 +66,70 @@
         <div class="row">
             <div class="col-12">
                 <hr class="mt-5 mb-4 border-secondary-subtle">
-                <p class="m-0 text-secondary text-end">Already have an account? <a href="#!" class="link-primary text-decoration-none">Sign in</a></p>
+                <p class="m-0 text-secondary text-end">Already have an account? <a href="/auth/login" class="link-primary text-decoration-none">Sign in</a></p>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $('#formAuthentication').on('submit', function (event) {
+                event.preventDefault();
+                var form = this;
+                debugger;
+
+                var data = {
+                    FirstName: $('#firstName').val(),
+                    LastName: $('#lastName').val(),
+                    UserName: $('#userName').val(),
+                    Email: $('#email').val(),
+                    Password: $('#password').val()
+                }
+
+                if ($('#firstName').val() === '' || $('#lastName').val() === '' || $('#userName').val() === '' || $('#email').val() === '' || $('#password').val() === '') {
+                    if ($('#firstName').val() === '')
+                        $('#firstNameValidator').text('First Name is required');
+                    if ($('#lastName').val() === '')
+                        $('#lastNameValidator').text('Last Name is required');
+                    if ($('#userName').val() === '')
+                        $('#userNameValidator').text('User Name is required');
+                    if ($('#email').val() === '')
+                        $('#emailValidator').text('Email is required');
+                    $('#passwordValidator').text('Password is required');
+
+                    return false;
+                }
+                else {
+                    $('#firstNameValidator').text('');
+                    $('#lastNameValidator').text('');
+                    $('#userNameValidator').text('');
+                    $('#emailValidator').text('');
+                    $('#passwordValidator').text('');
+                }
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/auth/register',
+                    data: JSON.stringify(data),
+                    contentType: 'application/json',
+
+                    success: function (result) {
+                        if (result.success) {
+                            debugger;
+                            window.location.href = result.redirectUrl;
+                        }
+                        else {
+                            debugger;
+
+                            $('#errorMessage').text(result.message).show();
+                        }
+                    },
+                });
+            });
+        });
+
+    </script>
+}

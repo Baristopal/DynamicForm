@@ -10,18 +10,16 @@ using WebUI.Models;
 
 namespace WebUI.Controllers;
 [Route("/")]
-[Authorize(Roles = "User")]
+[Authorize]
 public class FormController : Controller
 {
     private readonly IFormService _formService;
     private readonly IValidator<FormDto> _validator;
-    private readonly IValidator<TestValidationDto> _fieldValidator;
 
-    public FormController(IFormService formService, IValidator<FormDto> validator, IValidator<TestValidationDto> fieldValidator)
+    public FormController(IFormService formService, IValidator<FormDto> validator)
     {
         _formService = formService;
         _validator = validator;
-        _fieldValidator = fieldValidator;
     }
 
     [HttpGet("/forms")]
@@ -38,10 +36,8 @@ public class FormController : Controller
     [HttpGet("/EditForm")]
     public IActionResult EditForm()
     {
-        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            return PartialView("~/Views/Form/EditForm.cshtml");
-
-        return BadRequest("Invalid request");
+        var asdas= PartialView("Partials/_EditFormPartial");
+        return asdas;
     }
 
     [HttpPost("/AddForm")]
@@ -108,31 +104,31 @@ public class FormController : Controller
 
     }
 
-    [HttpPost("/FormValidation")]
-    public IActionResult FormValidation([FromBody] List<TestValidationDto> models)
-    {
-        foreach (var item in models)
-        {
-            if (!item.Required)
-                continue;
+    //[HttpPost("/FormValidation")]
+    //public IActionResult FormValidation([FromBody] List<TestValidationDto> models)
+    //{
+    //    foreach (var item in models)
+    //    {
+    //        if (!item.Required)
+    //            continue;
 
-            var data = item.Data as string;
-            if (data != null)
-                data = data.Split(":")[1];
+    //        var data = item.Data as string;
+    //        if (data != null)
+    //            data = data.Split(":")[1];
 
-            item.Data = data;
+    //        item.Data = data;
 
-            ValidationResult validationResult = _fieldValidator.Validate(item);
+    //        ValidationResult validationResult = _fieldValidator.Validate(item);
 
-            if (!validationResult.IsValid)
-            {
-                foreach (var error in validationResult.Errors)
-                {
-                    ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
-                }
-            }
+    //        if (!validationResult.IsValid)
+    //        {
+    //            foreach (var error in validationResult.Errors)
+    //            {
+    //                ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+    //            }
+    //        }
 
-        }
-        return View(models);
-    }
+    //    }
+    //    return View(models);
+    //}
 }

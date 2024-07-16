@@ -7,90 +7,11 @@
 }
 
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
-<script type="text/javascript">
-    $(document).ready(function () {
-        $('#getModal').on('click', function () {
-
-            $.ajax({
-                url: '/EditForm',
-                type: 'GET',
-                success: function (result) {
-                    $('#modalContainer').html(result);
-                    $('#exampleModalCenter').modal('show');
-                }
-
-            });
-        });
-
-
-
-        $('#search').on('keyup', function () {
-            debugger;
-            var forms = @Html.Raw(modelJson);
-            var search = $('#search').val();
-            var filter = {
-                Name: search,
-                Forms: forms,
-            }
-            $.ajax({
-                url: '/SearchForms',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(filter),
-                success: function (result) {
-                    debugger;
-                    var tbody = $('#formTableBody');
-                    tbody.empty();
-
-                    $.each(result, function (index, form) {
-                        var row = '<tr>' +
-                            '<th>' + form.id + '</th>' +
-                            '<td>' + form.name + '</td>' +
-                            '<td>' + form.description + '</td>' +
-                            '<td><button class="btn btn-primary btn-sm" onclick="showForm(' + form.id + ')">Görüntüle</button></td>' +
-                            '</tr>';
-                        tbody.append(row);
-                    });
-                },
-            });
-
-        });
-
-        $('.openDetail').on('click', function () {
-            var formId = $(this).closest('tr').find('th').text();
-            debugger;
-            var result;
-            $.ajax({
-                url: `/forms/${formId}`,
-                type: 'GET',
-                data: { id: formId },
-                success: function (result) {
-                    if (result.length > 0) {
-
-                        debugger;
-                        window.open(`/forms/${formId}`, '_blank');
-                    }
-                    else {
-                        $('#notLoadForm').toast('show');
-                        console.log("hata");
-                    }
-                }
-            });
-        });
-
-
-    });
-
-</script>
-
-
 
 <div class="d-flex justify-content-between">
-    <div class="d-flex">
+    <div>
         <input type="text" class="form-control" placeholder="Ara" id="search">
-        <button type="submit" class="btn btn-primary" style="border-radius:5px; margin-left:2px;" id="searchButtom">Ara</button>
+
     </div>
     <button type="button" id="getModal" class="btn btn-primary" style="border-radius:5px;">Yeni Form Oluştur</button>
 </div>
@@ -141,3 +62,16 @@
         </tbody>
     </table>
 </div>
+
+
+
+@section Scripts {
+
+    <script type="text/javascript">
+        var forms = @Html.Raw(modelJson);
+
+    </script>
+    <script src="~/js/formPage.js"></script>
+
+
+}

@@ -1,8 +1,11 @@
 ﻿using Business.Abstract;
 using Business.AutoMapper;
 using Business.Concrete;
+using Business.ValidationRules;
 using DataAccess.Abstract;
 using DataAccess.Concrete;
+using Entities.Dto;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,6 +22,10 @@ public static class RegisterService
 
 
         services.AddAutoMapper(opt => opt.AddProfile<AutoMapperProfile>());
+
+        services.AddScoped<IValidator<UserForRegisterDto>, UserRegisterValidator>();
+        services.AddScoped<IValidator<FormDto>, EditFormValidator>();
+        services.AddScoped<IValidator<UserForLoginDto>, UserLoginValidator>();
 
         ConfigureIoC(services);
 

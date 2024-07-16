@@ -9,15 +9,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews()
-    .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<EditFormValidator>());
+    .AddFluentValidation(fv => fv?.RegisterValidatorsFromAssemblyContaining<EditFormValidator>());
 
 builder.Services.ConfigureService(builder.Configuration);
 
-builder.Services.AddScoped<IValidator<UserForRegisterDto>, UserRegisterValidator>();
-builder.Services.AddScoped<IValidator<FormDto>, EditFormValidator>();
-builder.Services.AddScoped<IValidator<TestValidationDto>, FieldValidator>();
 
-builder.Services.AddValidatorsFromAssemblyContaining<UserRegisterValidator>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

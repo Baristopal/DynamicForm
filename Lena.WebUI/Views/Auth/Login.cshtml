@@ -1,41 +1,15 @@
-﻿@{
+﻿@using Entities.Dto
+@using Entities.Models
+@{
     Layout = "_AuthLayout";
 }
 
+@model ResponseModel<UserForLoginDto>
 
 @section Styles {
     <link rel="stylesheet" href="https://unpkg.com/bs-brain@2.0.4/components/registrations/registration-3/assets/css/registration-3.css">
 
 }
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
-
-<script type="text/javascript">
-
-    $(document).ready(function () {
-        $('#formAuthentication').on('submit', function (event) {
-            var form = this;
-            debugger;
-            $.ajax({
-                type: 'POST',
-                url: '/auth/login',
-                data: $(form).serialize(),
-
-                 success: function (response) {
-                    if (response.status === 200) {
-                        alert('Login Successful!');
-                        window.location.href = '/';
-                    } else {
-                        alert(response.message);
-                    }
-                },
-            });
-        });
-    });
-
-</script>
-
 
 <div class="mx-auto mt-5 bsb-tpl-bg-lotion">
     <div class="p-3 p-md-4 p-xl-5">
@@ -46,16 +20,19 @@
                 </div>
             </div>
         </div>
+        
         <form id="formAuthentication" class="mb-3" method="post">
-
             <div class="row gy-3 gy-md-4 overflow-hidden">
+                <div id="errorMessage" class="alert alert-danger" style="display:none;"></div>
                 <div class="col-12">
                     <label for="UserName" class="form-label">User Name <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" name="UserName" id="UserName" placeholder="User Name">
+                    <span style="color:red;" asp-validation-for="Data.UserName" id="UserNameValidator"></span>
                 </div>
                 <div class="col-12">
                     <label for="Password" class="form-label">Password <span class="text-danger">*</span></label>
                     <input type="password" class="form-control" name="Password" id="Password" value="">
+                    <span style="color:red;" asp-validation-for="Data.Password" id="PasswordValidator"></span>
                 </div>
                 <div class="col-12">
                     <div class="d-grid">
@@ -72,3 +49,54 @@
         </div>
     </div>
 </div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#formAuthentication').on('submit', function (event) {
+            event.preventDefault();
+            var form = this;
+            debugger;
+
+            var data = {
+                UserName: $('#UserName').val(),
+                Password: $('#Password').val()
+            };
+
+            if ($('#UserName').val() === '' || $('#Password').val() === '') {
+                if ($('#UserName').val() === '')
+                    $('#UserNameValidator').text('User Name is required');
+                $('#PasswordValidator').text('Password is required');
+
+                return false;
+            }
+            else {
+                $('#UserNameValidator').text('');
+                $('#PasswordValidator').text('');
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: '/auth/login',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                success: function (result) {
+                    if (result.success) {
+                        debugger;
+                        window.location.href = result.redirectUrl;
+                    }
+                    else{ 
+                        debugger;
+                        $('#errorMessage').text('Kullanıcı adı veya şifre yanlış!').show();
+                    }
+                },
+            });
+        });
+    });
+
+</script>
+@section Scripts {
+
+}
