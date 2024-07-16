@@ -9,6 +9,7 @@ using System.Security.Claims;
 
 namespace WebUI.Controllers;
 [Route("auth")]
+
 public class AuthController : Controller
 {
     private readonly IUserService _userService;

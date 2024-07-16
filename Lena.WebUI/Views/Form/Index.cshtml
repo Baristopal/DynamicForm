@@ -1,8 +1,13 @@
-﻿@{
+﻿@using Entities.Dto
+@using Newtonsoft.Json
+@model List<FormDto>
+@{
     Layout = "_Layout";
+    var modelJson = JsonConvert.SerializeObject(Model);
 }
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
 <script type="text/javascript">
     $(document).ready(function () {
@@ -19,47 +24,120 @@
             });
         });
 
-      
+
+
+        $('#search').on('keyup', function () {
+            debugger;
+            var forms = @Html.Raw(modelJson);
+            var search = $('#search').val();
+            var filter = {
+                Name: search,
+                Forms: forms,
+            }
+            $.ajax({
+                url: '/SearchForms',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(filter),
+                success: function (result) {
+                    debugger;
+                    var tbody = $('#formTableBody');
+                    tbody.empty();
+
+                    $.each(result, function (index, form) {
+                        var row = '<tr>' +
+                            '<th>' + form.id + '</th>' +
+                            '<td>' + form.name + '</td>' +
+                            '<td>' + form.description + '</td>' +
+                            '<td><button class="btn btn-primary btn-sm" onclick="showForm(' + form.id + ')">Görüntüle</button></td>' +
+                            '</tr>';
+                        tbody.append(row);
+                    });
+                },
+            });
+
+        });
+
+        $('.openDetail').on('click', function () {
+            var formId = $(this).closest('tr').find('th').text();
+            debugger;
+            var result;
+            $.ajax({
+                url: `/forms/${formId}`,
+                type: 'GET',
+                data: { id: formId },
+                success: function (result) {
+                    if (result.length > 0) {
+
+                        debugger;
+                        window.open(`/forms/${formId}`, '_blank');
+                    }
+                    else {
+                        $('#notLoadForm').toast('show');
+                        console.log("hata");
+                    }
+                }
+            });
+        });
+
+
     });
+
 </script>
 
 
 
-<div class="d-flex flex-row-reverse">
+<div class="d-flex justify-content-between">
+    <div class="d-flex">
+        <input type="text" class="form-control" placeholder="Ara" id="search">
+        <button type="submit" class="btn btn-primary" style="border-radius:5px; margin-left:2px;" id="searchButtom">Ara</button>
+    </div>
     <button type="button" id="getModal" class="btn btn-primary" style="border-radius:5px;">Yeni Form Oluştur</button>
 </div>
 
 
 <div id="modalContainer"></div>
 
+<div class="toast-container position-fixed top-0 end-0 p-3 ">
+    <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-body" style="background:#d1e7dd; color:white;">
+            Form başarıyla kaydedildi
+        </div>
+    </div>
+</div>
+
+
+
+<div class="toast-container position-fixed top-0 end-0 p-3 ">
+    <div id="notLoadForm" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-body" style="background:#dc3545;">
+            Form Hatalı!
+        </div>
+    </div>
+</div>
+
 <div class="mt-5">
     <table class="table">
         <thead>
             <tr>
-                <th scope="col">#</th>
-                <th scope="col">First</th>
-                <th scope="col">Last</th>
-                <th scope="col">Handle</th>
+                <th>No</th>
+                <th>Ad</th>
+                <th>Açıklama</th>
+                <th></th>
             </tr>
         </thead>
-        <tbody>
-            <tr>
-                <th scope="row">1</th>
-                <td>Mark</td>
-                <td>Otto</td>
-                <td>asd</td>
-            </tr>
-            <tr>
-                <th scope="row">2</th>
-                <td>Jacob</td>
-                <td>Thornton</td>
-                <td>asdasd</td>
-            </tr>
-            <tr>
-                <th scope="row">3</th>
-                <td colspan="2">Larry the Bird</td>
-                <td>asdasf</td>
-            </tr>
+        <tbody id="formTableBody">
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <th>@item.Id</th>
+                    <td>@item.Name</td>
+                    <td>@item.Description</td>
+                    <td>
+                        <button type="button" class="btn btn-primary openDetail">Görüntüle</button>
+                    </td>
+                </tr>
+            }
         </tbody>
     </table>
 </div>

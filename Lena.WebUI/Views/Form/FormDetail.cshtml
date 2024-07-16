@@ -1,0 +1,84 @@
+﻿@using Entities.Dto
+@using Newtonsoft.Json
+@using System.Dynamic
+@{
+    Layout = "_Layout";
+    var fields = Model.Fields;
+}
+@model FormDto
+
+@section Styles {
+    <link rel="stylesheet" href="https://unpkg.com/bs-brain@2.0.4/components/registrations/registration-3/assets/css/registration-3.css">
+
+}
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#validation').on('click', function (event) {
+            event.preventDefault();
+            debugger;
+            var formModel = @Html.Raw(JsonConvert.SerializeObject(Model));
+            var model = [];
+
+            var fields = formModel.Fields;
+            model = [...fields];
+
+            model.forEach(function (item) {
+                item.Data = $('input[name="' + item.Name + '-Data"]').val();
+            });
+
+            console.log(model);
+
+            $.ajax({
+                type: "POST",
+                url: "/FormValidation",
+                data: JSON.stringify(model),
+                contentType: "application/json;",
+                success: function (response) {
+                    console.log(response);
+                }
+            });
+
+        });
+    });
+</script>
+
+<div class="mx-auto mt-5 bsb-tpl-bg-lotion">
+    <div class="p-3 p-md-4 p-xl-5" style="background:#bbb6b6; border-radius:50px;">
+        <div class="row">
+            <h3>@Model.Name</h3>
+            <div class="d-flex">
+                <p>Açıklama: &nbsp;</p>
+                <p>@Model.Description</p>
+
+            </div>
+        </div>
+        <br />
+        <form id="dynamicForm" class="mb-3" method="post" action="/FormValidation">
+            <div class="row gy-3 gy-md-4 overflow-hidden">
+                @foreach (var item in fields)
+                {
+                    <div class="col-6">
+                        <label for="@(item.Name+"-Data")" class="form-label">@item.Name</label>
+                        <input type="text" class="form-control" name="@(item.Name+"-Data")">
+                        <span style="color:red;" asp-validation-for="@item"></span>
+                    </div>
+                }
+
+              @*   <div class="col-12">
+                    <div class="d-grid">
+                        <button class="btn bsb-btn-xl btn-primary" type="submit" id="validation">Validation Test</button>
+                    </div>
+                </div> *@
+            </div>
+        </form>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -5,6 +5,7 @@ using WebUI.Models;
 
 namespace WebUI.Controllers;
 
+[Authorize(Roles = "User")]
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
@@ -13,7 +14,6 @@ public class HomeController : Controller
     {
         _logger = logger;
     }
-    [Authorize(Roles = "User")]
     public IActionResult Index()
     {
         return View();

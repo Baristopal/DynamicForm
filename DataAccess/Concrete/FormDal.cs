@@ -1,6 +1,7 @@
 ﻿using DataAccess.Abstract;
 using DataAccess.Repositories;
 using Entities.Concrete;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.Concrete;
 public class FormDal : GenericRepository<Form>, IFormDal
@@ -17,4 +18,17 @@ public class FormDal : GenericRepository<Form>, IFormDal
         await _context.SaveChangesAsync();
         return field;
     }
+
+    public async Task<List<Form>> GetAllFormWithFields()
+    {
+        var result = await _context.Forms.Include(x => x.Fields).ToListAsync();
+        return result;
+    }
+
+    public async Task<Form> GetFormWithFields(int id)
+    {
+        var result = await _context.Forms?.Include(x => x.Fields)?.FirstOrDefaultAsync(x => x.Id == id)!;
+        return result!;
+    }
+
 }

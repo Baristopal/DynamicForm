@@ -1,16 +1,7 @@
 ﻿@using Business.Enums
-@* <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
+@using Entities.Dto
 
-</body>
-</html>
- *@
+@model FormDto;
 
 <script type="text/javascript">
     $(document).ready(function () {
@@ -18,6 +9,7 @@
 
         var selectedFields = [];
         $('.custom-button').click(function () {
+            // debugger;
             var fieldName = $(this).attr('name');
 
             if (selectedFields.find(e => e.name === fieldName)) {
@@ -33,9 +25,18 @@
                 $("#field-" + fieldName + "-Required").prop('checked', false);
                 return;
             }
+            var dataType;
+            if (fieldName === "Age") {
+                dataType = "NUMBER";
+            }
+            else {
+                dataType = "STRING";
+            }
+
             var model = {
                 name: fieldName,
-                required: $(this).find('input[type="checkbox"]').is(':checked')
+                required: $(this).find('input[type="checkbox"]').is(':checked'),
+                dataType: dataType
             }
             selectedFields.push(model);
             $(this).addClass('btn-info');
@@ -59,39 +60,58 @@
                 selectedFields.push(model);
                 console.log(selectedFields);
             }
-            
+
         });
 
         $(".close").click(function () {
             $("#exampleModalCenter").modal("hide");
         });
 
-        $('#Save').on('click', function () {
-            var data  = {
+
+
+
+        $('#Save').on('click', function (event) {
+            debugger;
+            event.preventDefault();
+            var data = {
                 Name: $('#Name').val(),
                 Description: $('#Description').val(),
                 Fields: selectedFields
             }
-            debugger;
+
+            if ($('#Name').val() === "")
+                $('#NameValidaton').text("Name is required");
+            if ($('#Description').val() === "")
+                $('#DescriptionValidation').text("Description is required");
+            if(selectedFields.length === 0)
+                $('#FieldsValidation').text("Fields is required");
+
+
+            // debugger;
             $.ajax({
                 type: 'POST',
                 url: '/AddForm',
                 data: JSON.stringify(data),
-                
+
                 contentType: 'application/json',
                 success: function (response) {
-                    if (response.status === 200) {
+                    if (response.success === true) {
                         debugger;
                         $("#exampleModalCenter").modal("hide");
-                    } 
-                    // else {
-                    //     debugger;
-                    //     alert(response.message);
-                    // }
+                        $('#successToast').toast('show');
+                        location.reload();
+                    }
+                    else {
+                        debugger;
+                        $('#dangerToast').toast('show');
+                    }
                 },
             });
 
         });
+
+
+
     });
 </script>
 
@@ -107,6 +127,14 @@
 </style>
 
 
+<div class="toast-container position-fixed top-0 end-0 p-3 ">
+    <div id="dangerToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-body" style="background:#dc3545;">
+            Form Kaydedilemedi!
+        </div>
+    </div>
+</div>
+
 <div class="modal fade bd-example-modal-lg" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -116,50 +144,61 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-6">
-                        <form id="editData" method="post">
+            <form id="editData" method="post">
+
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-6">
                             <div class="row gy-3 gy-md-4 overflow-hidden">
                                 <div class="col-12">
                                     <label for="Name" class="form-label">Form Name</label>
                                     <input type="text" class="form-control" name="Name" id="Name">
+                                    <span style="color:red;" asp-validation-for="Name" id="NameValidaton"></span>
+
                                 </div>
                                 <div class="col-12">
                                     <label for="Description" class="form-label">Description</label>
-                                    <textarea class="form-control" name="Description" id="Description" rows="6" ></textarea>
+                                    <textarea class="form-control" name="Description" id="Description" rows="6"></textarea>
+                                    <span style="color:red;" asp-validation-for="Description" id="DescriptionValidation"></span>
                                 </div>
                             </div>
-                        </form>
-                    </div>
-                    <div class="col-6">
-                        <div>
-                            <h5>Form Öğeleri</h5>
-                            <p style="font-size:small">Buton içindeki Checkbox'lar <span style="color:red">Required</span> kontrolü sağlıyor</p>
                         </div>
-                        <div class="d-flex row">
-                            @foreach (var field in Enum.GetNames(typeof(FieldEnums)))
-                            {
-                                <div class="col-6" style="margin-top:5px;">
-                                    <button type="button" id="@("field-" + field)" name="@field" class="btn btn-light btn-block custom-button" style="width:100%;">
-                                        <div class="d-flex justify-content-between">
-                                            @field
-                                            <div>
-                                                @* <label for="@("field-" + field + "-Required")"><span style="color:red">*</span></label> *@
-                                                <input class="form-check-input" type="checkbox" onclick="event.stopPropagation();" value="" name="@("field-" + field + "-Required")" id="@("field-" + field + "-Required")" />
+
+                        <div class="col-6">
+                            <div>
+                                <h5>Form Öğeleri</h5>
+                                <p style="font-size:small">Buton içindeki Checkbox'lar <span style="color:red">Required</span> kontrolü sağlıyor</p>
+                                <span style="color:red;" asp-validation-for="Fields" id="FieldsValidation"></span>
+                            </div>
+                            <div class="d-flex row">
+                                @foreach (var field in Enum.GetNames(typeof(FieldEnums)))
+                                {
+                                    <div class="col-6" style="margin-top:5px;">
+                                        <button type="button" id="@("field-" + field)" name="@field" class="btn btn-light btn-block custom-button" style="width:100%;">
+                                            <div class="d-flex justify-content-between">
+                                                @field
+                                                <div>
+                                                    @* <label for="@("field-" + field + "-Required")"><span style="color:red">*</span></label> *@
+                                                    <input class="form-check-input" type="checkbox" onclick="event.stopPropagation();" value="" name="@("field-" + field + "-Required")" id="@("field-" + field + "-Required")" />
+                                                </div>
                                             </div>
-                                        </div>
-                                    </button>
-                                </div>
-                            }
+                                        </button>
+                                    </div>
+                                }
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary close" data-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary" id="Save" >Save changes</button>
-            </div>
+                <div class="modal-footer mt-3">
+                    <button type="button" class="btn btn-secondary close" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" id="Save">Save changes</button>
+                </div>
+            </form>
+
         </div>
     </div>
 </div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

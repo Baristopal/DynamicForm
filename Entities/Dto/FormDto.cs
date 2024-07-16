@@ -1,4 +1,5 @@
 ﻿using Entities.Abstract;
+using System.ComponentModel.DataAnnotations;
 
 namespace Entities.Dto;
 public class FormDto : BaseEntity
